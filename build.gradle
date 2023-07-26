@@ -70,10 +70,10 @@ publishing {
 }
 gem {
     from("LICENSE.txt")
-    authors = [ "Civitaspo" ]
-    email = [ "civitaspo@gmail.com" ]
-    summary = "An embulk output plugin to egest records as json via http/https."
-    homepage = "https://github.com/trocco-io/embulk-output-http_json"
+    authors = [ "" ]
+    email = [ "" ]
+    summary = "Parquet parser plugin for Embulk."
+    homepage = "https://github.com/trocco-io/embulk-parser-parquet"
     licenses = [ "MIT" ]
 
     into("lib/embulk/guess/") {
