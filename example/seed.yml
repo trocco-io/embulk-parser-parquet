@@ -1,0 +1,6 @@
+in:
+  type: file
+  parser:
+    type: parquet
+  path_prefix: example/sample.parquet
+out: {type: stdout}
