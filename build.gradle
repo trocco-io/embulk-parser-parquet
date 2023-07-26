@@ -1,0 +1,100 @@
+plugins {
+    id "java"
+    id "maven-publish"
+    id "org.embulk.embulk-plugins" version "0.4.2"
+    id "com.diffplug.spotless" version "5.15.0"
+    id "com.palantir.git-version" version "0.12.3"
+}
+repositories {
+    mavenCentral()
+}
+
+group = "io.trocco"
+description = "An embulk output plugin to egest records as json via http/https."
+version = {
+    def vd = versionDetails()
+    if (vd.commitDistance == 0 && vd.lastTag ==~ /^[0-9]+\.[0-9]+\.[0-9]+(\.[a-zA-Z0-9]+)?/) {
+        vd.lastTag
+    } else {
+        "0.0.0.${vd.gitHash}"
+    }
+}()
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+    def embulkVersion = "0.10.33"
+    compileOnly "org.embulk:embulk-api:${embulkVersion}"
+    compileOnly "org.embulk:embulk-spi:${embulkVersion}"
+    compile "org.embulk:embulk-util-file:0.1.3"
+    compile "org.embulk:embulk-util-json:0.1.1"
+    compile "org.embulk:embulk-util-timestamp:0.2.1"
+    compile "org.embulk:embulk-util-config:0.3.0"
+
+    compile 'org.apache.parquet:parquet-avro:1.9.0'
+    compile 'org.apache.parquet:parquet-hadoop:1.10.1'
+    compile 'org.apache.hadoop:hadoop-mapreduce-client-core:3.3.6'
+    compile 'org.apache.hadoop:hadoop-common:3.3.6'
+
+    // For @ConfigDefault Optional
+    compile project(path: ":shadow-jackson-jq", configuration: 'shadow')
+
+    testImplementation platform('org.junit:junit-bom:5.8.1')
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    /*
+    testImplementation "org.embulk:embulk-core:${embulkVersion}"
+    testImplementation "org.embulk:embulk-deps:${embulkVersion}"
+    testImplementation "org.embulk:embulk-input-config:${embulkVersion}"
+    testImplementation 'com.github.tomakehurst:wiremock-jre8:2.32.0'
+*/
+}
+
+embulkPlugin {
+    mainClass = "org.embulk.parser.parquet.ParquetParserPlugin"
+    category = "parser"
+    type = "parquet"
+}
+
+publishing {
+    publications {
+        embulkPluginMaven(MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url = "${project.buildDir}/mavenPublishLocal"
+        }
+    }
+}
+gem {
+    from("LICENSE.txt")
+    authors = [ "Civitaspo" ]
+    email = [ "civitaspo@gmail.com" ]
+    summary = "An embulk output plugin to egest records as json via http/https."
+    homepage = "https://github.com/trocco-io/embulk-output-http_json"
+    licenses = [ "MIT" ]
+
+    into("lib/embulk/guess/") {
+        from "lib/embulk/guess/parquet.rb"
+    }
+}
+spotless {
+    java {
+        importOrder()
+        removeUnusedImports()
+        googleJavaFormat().aosp()
+    }
+}
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "PASSED", "SKIPPED", "FAILED", "STANDARD_OUT", "STANDARD_ERROR"
+        exceptionFormat "full"
+        showExceptions true
+        showCauses true
+        showStackTraces true
+        showStandardStreams true
+    }
+}
