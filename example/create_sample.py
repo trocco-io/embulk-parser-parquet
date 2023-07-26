@@ -1,8 +1,6 @@
 import pandas as pd
 from datetime import datetime
 
-dt = datetime.now()
-tags = ["tag0", "tag1"]
 df = pd.DataFrame({
     "id": [1, 2, 3],
     "string": ["Tanaka", "Suzuki", "Sato"],
