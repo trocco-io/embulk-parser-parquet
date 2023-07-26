@@ -1,3 +1,3 @@
-rootProject.name = 'embulk-output-http_json'
+rootProject.name = 'embulk-parser-parquet'
 
 include ':shadow-jackson-jq'

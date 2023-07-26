@@ -10,12 +10,10 @@ Parquet parser plugin for Embulk.
 ## Configuration
 
 - **type**: Specify this parser as parquet
-- **columns**: Specify column name and type. See below (array, optional)
+- **columns**: Specify column name and type. See below (array, required)
   - timestamp_unit: Specify unit of time. (This config is effective only if parquet value is `long`, `int`, `float`, `double`)
 * **default_timezone**: Default timezone of the timestamp (string, default: UTC)
 * **default_timestamp_format**: Default timestamp format of the timestamp (string, default: `%Y-%m-%d %H:%M:%S.%N %z`)
-
-If columns is not set, this plugin detect schema automatically by using first record schema.
 
 support `timestamp_unit` type is below.
 
