@@ -1,0 +1,14 @@
+in:
+  type: file
+  parser:
+    type: parquet
+    columns:
+    - {name: id, type: long}
+    - {name: string, type: string}
+    - {name: number, type: double}
+    - {name: date_string, type: timestamp, format: "%Y-%m-%dT%H:%M:%S"}
+    - {name: datetime, type: timestamp, timestamp_unit: microsecond}
+    - {name: array, type: json}
+    - {name: object, type: json}
+  path_prefix: example/sample.parquet
+out: {type: stdout}
