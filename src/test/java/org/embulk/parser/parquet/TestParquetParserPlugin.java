@@ -71,11 +71,6 @@ public class TestParquetParserPlugin {
     }
 
     @Test
-    public void testB() {
-        assertEquals(1, 1);
-    }
-
-    @Test
     public void testRun() {
         runtime = new EmbulkTestRuntime();
         final SchemaConfig columnSchema =  schema(
@@ -97,6 +92,7 @@ public class TestParquetParserPlugin {
         assertEquals(1, records.size());
 
         Object[] record = records.get(0);
+        assertEquals(7, record.length);
         assertEquals(1L, record[0]);
         assertEquals("Tanaka", record[1]);
         assertEquals(3.5, record[2]);
