@@ -1,7 +1,11 @@
 package org.embulk.guess.parquet;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.collect.ImmutableMap;
+import static org.junit.Assert.assertEquals;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.embulk.config.ConfigDiff;
 import org.embulk.config.ConfigSource;
@@ -11,23 +15,11 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-
 public class TestParquetGuessPlugin {
-    @Rule
-    public EmbulkTestRuntime runtime;
+    @Rule public EmbulkTestRuntime runtime;
 
     @Before
-    public void  setUp() {
+    public void setUp() {
         runtime = new EmbulkTestRuntime();
     }
 

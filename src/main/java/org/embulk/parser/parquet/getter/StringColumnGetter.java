@@ -1,12 +1,11 @@
 package org.embulk.parser.parquet.getter;
 
+import java.time.Instant;
 import org.embulk.spi.Column;
 import org.embulk.spi.PageBuilder;
 import org.embulk.spi.time.Timestamp;
 import org.embulk.util.json.JsonParser;
 import org.embulk.util.timestamp.TimestampFormatter;
-
-import java.time.Instant;
 
 public class StringColumnGetter extends BaseColumnGetter {
     protected String value;
@@ -20,20 +19,16 @@ public class StringColumnGetter extends BaseColumnGetter {
     }
 
     @Override
-    public void setValue(Object value)
-    {
-        if (value == null)
-            this.value = null;
-        else
-            this.value = value.toString();
+    public void setValue(Object value) {
+        if (value == null) this.value = null;
+        else this.value = value.toString();
     }
 
     @Override
     public void booleanColumn(Column column) {
         if (this.value == null) {
             pageBuilder.setNull(column);
-        }
-        else {
+        } else {
             pageBuilder.setBoolean(column, Boolean.parseBoolean(value));
         }
     }
@@ -42,8 +37,7 @@ public class StringColumnGetter extends BaseColumnGetter {
     public void longColumn(Column column) {
         if (this.value == null) {
             pageBuilder.setNull(column);
-        }
-        else {
+        } else {
             pageBuilder.setLong(column, Long.parseLong(value));
         }
     }
@@ -52,8 +46,7 @@ public class StringColumnGetter extends BaseColumnGetter {
     public void doubleColumn(Column column) {
         if (this.value == null) {
             pageBuilder.setNull(column);
-        }
-        else {
+        } else {
             pageBuilder.setDouble(column, Double.parseDouble(value));
         }
     }
@@ -62,8 +55,7 @@ public class StringColumnGetter extends BaseColumnGetter {
     public void stringColumn(Column column) {
         if (this.value == null) {
             pageBuilder.setNull(column);
-        }
-        else {
+        } else {
             pageBuilder.setString(column, value);
         }
     }
@@ -72,8 +64,7 @@ public class StringColumnGetter extends BaseColumnGetter {
     public void timestampColumn(Column column) {
         if (this.value == null) {
             pageBuilder.setNull(column);
-        }
-        else {
+        } else {
             Instant instant = timestampFormatter.parse(value);
             Timestamp timestamp = Timestamp.ofInstant(instant);
             // TODO use Instant directly after embulk v.0.10
@@ -85,8 +76,7 @@ public class StringColumnGetter extends BaseColumnGetter {
     public void jsonColumn(Column column) {
         if (this.value == null) {
             pageBuilder.setNull(column);
-        }
-        else {
+        } else {
             pageBuilder.setJson(column, jsonParser.parse(value));
         }
     }

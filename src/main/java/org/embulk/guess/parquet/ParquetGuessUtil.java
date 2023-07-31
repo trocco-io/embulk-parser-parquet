@@ -1,21 +1,23 @@
 package org.embulk.guess.parquet;
 
+import java.util.*;
+import java.util.stream.Collectors;
 import org.apache.avro.Schema;
 import org.embulk.spi.type.Type;
 import org.embulk.spi.type.Types;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 public class ParquetGuessUtil {
 
-    static public List<Map<String, String>> createColumns(List<Schema.Field> fields) {
-        return fields.stream().map(field -> {
-            Map<String, String> column = new HashMap<>();
-            column.put("name", field.name());
-            column.put("type", convertType(field).getName());
-            return  column;
-        }).collect(Collectors.toList());
+    public static List<Map<String, String>> createColumns(List<Schema.Field> fields) {
+        return fields.stream()
+                .map(
+                        field -> {
+                            Map<String, String> column = new HashMap<>();
+                            column.put("name", field.name());
+                            column.put("type", convertType(field).getName());
+                            return column;
+                        })
+                .collect(Collectors.toList());
     }
 
     private static final Map<Schema.Type, Type> TYPE_MAP = new EnumMap<>(Schema.Type.class);
@@ -36,13 +38,18 @@ public class ParquetGuessUtil {
         TYPE_MAP.put(Schema.Type.RECORD, Types.JSON);
     }
 
-    static public Type convertType(Schema.Field field) {
+    public static Type convertType(Schema.Field field) {
         Schema.Type type = field.schema().getType();
-        if(type != Schema.Type.UNION) {
+        if (type != Schema.Type.UNION) {
             return TYPE_MAP.get(type);
         }
 
-        Schema.Type firstNotNullTypeInTypes = field.schema().getTypes().stream().map(s -> s.getType()).filter(t -> t != Schema.Type.NULL).findFirst().orElse(null);
+        Schema.Type firstNotNullTypeInTypes =
+                field.schema().getTypes().stream()
+                        .map(s -> s.getType())
+                        .filter(t -> t != Schema.Type.NULL)
+                        .findFirst()
+                        .orElse(null);
         return TYPE_MAP.get(firstNotNullTypeInTypes);
     }
 }

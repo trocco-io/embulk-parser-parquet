@@ -14,8 +14,7 @@ public class FloatColumnGetter extends BaseColumnGetter {
     }
 
     @Override
-    public void setValue(Object value)
-    {
+    public void setValue(Object value) {
         this.value = (Float) value;
     }
 
@@ -50,8 +49,7 @@ public class FloatColumnGetter extends BaseColumnGetter {
     public void timestampColumn(Column column) {
         if (this.value == null) {
             pageBuilder.setNull(column);
-        }
-        else {
+        } else {
             pageBuilder.setTimestamp(column, timestampUnit.toTimestamp(value.doubleValue()));
         }
     }

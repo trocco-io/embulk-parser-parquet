@@ -13,8 +13,7 @@ public class GenericDataColumnGetter extends BaseColumnGetter {
     public void stringColumn(Column column) {
         if (this.value == null) {
             pageBuilder.setNull(column);
-        }
-        else {
+        } else {
             Value converted = ParquetGenericDataConverter.convert(value);
             pageBuilder.setString(column, converted.toString());
         }
@@ -24,8 +23,7 @@ public class GenericDataColumnGetter extends BaseColumnGetter {
     public void jsonColumn(Column column) {
         if (this.value == null) {
             pageBuilder.setNull(column);
-        }
-        else {
+        } else {
             Value converted = ParquetGenericDataConverter.convert(value);
             pageBuilder.setJson(column, converted);
         }

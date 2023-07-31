@@ -11,8 +11,7 @@ public class BooleanColumnGetter extends BaseColumnGetter {
     }
 
     @Override
-    public void setValue(Object value)
-    {
+    public void setValue(Object value) {
         this.value = (Boolean) value;
     }
 

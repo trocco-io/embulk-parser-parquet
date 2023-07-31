@@ -1,5 +1,9 @@
 package org.embulk.parquet;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.parquet.avro.AvroReadSupport;
 import org.apache.parquet.hadoop.ParquetReader;
@@ -8,31 +12,27 @@ import org.apache.parquet.io.DelegatingSeekableInputStream;
 import org.apache.parquet.io.InputFile;
 import org.apache.parquet.io.SeekableInputStream;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 public class ParquetUtil {
     private static final byte[] PARQUET_HEADER = {0x50, 0x41, 0x52, 0x31};
-    static public boolean isParquetFile(byte[] bytes) {
-        if(PARQUET_HEADER.length > bytes.length) {
+
+    public static boolean isParquetFile(byte[] bytes) {
+        if (PARQUET_HEADER.length > bytes.length) {
             return false;
         }
-        for(int i = 0; i < PARQUET_HEADER.length; i++) {
-            if(PARQUET_HEADER[i] != bytes[i]) {
+        for (int i = 0; i < PARQUET_HEADER.length; i++) {
+            if (PARQUET_HEADER[i] != bytes[i]) {
                 return false;
             }
         }
         return true;
     }
 
-    static public GenericRecord fetchRecord(byte[] bytes) {
+    public static GenericRecord fetchRecord(byte[] bytes) {
         final ParquetReader<Object> reader = buildReader(bytes);
         try {
-            while(true) {
+            while (true) {
                 final Object obj = reader.read();
-                if(obj == null) {
+                if (obj == null) {
                     return null;
                 }
                 if (obj instanceof GenericRecord) {
@@ -44,13 +44,13 @@ public class ParquetUtil {
         }
     }
 
-    static public List<GenericRecord> fetchRecords(byte[] bytes) {
+    public static List<GenericRecord> fetchRecords(byte[] bytes) {
         final ParquetReader<Object> reader = buildReader(bytes);
         List<GenericRecord> records = new ArrayList<>();
         try {
-            while(true) {
+            while (true) {
                 final Object obj = reader.read();
-                if(obj == null) {
+                if (obj == null) {
                     break;
                 }
                 if (obj instanceof GenericRecord) {
@@ -63,11 +63,12 @@ public class ParquetUtil {
         return records;
     }
 
-    static private ParquetReader<Object> buildReader(byte[] bytes) {
+    private static ParquetReader<Object> buildReader(byte[] bytes) {
         InputFile parquetStream = new ParquetStream(bytes);
         try {
             Builder<Object> builder = new Builder<>(parquetStream);
-            return builder.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName()).build();
+            return builder.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName())
+                    .build();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

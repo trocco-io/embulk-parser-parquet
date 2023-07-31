@@ -13,68 +13,67 @@ public class BaseColumnGetter implements ColumnVisitor {
         this.pageBuilder = pageBuilder;
     }
 
-    public void setValue(Object value)
-    {
+    public void setValue(Object value) {
         this.value = value;
     }
 
     @Override
-    public void booleanColumn(Column column)
-    {
+    public void booleanColumn(Column column) {
         if (value == null) {
             pageBuilder.setNull(column);
         } else {
-            throw new DataException(String.format("cannot convert value from %s", column.getType()));
+            throw new DataException(
+                    String.format("cannot convert value from %s", column.getType()));
         }
     }
 
     @Override
-    public void longColumn(Column column)
-    {
+    public void longColumn(Column column) {
         if (value == null) {
             pageBuilder.setNull(column);
         } else {
-            throw new DataException(String.format("cannot convert value from %s", column.getType()));
+            throw new DataException(
+                    String.format("cannot convert value from %s", column.getType()));
         }
     }
 
     @Override
-    public void doubleColumn(Column column)
-    {
+    public void doubleColumn(Column column) {
         if (value == null) {
             pageBuilder.setNull(column);
         } else {
-            throw new DataException(String.format("cannot convert value from %s", column.getType()));
+            throw new DataException(
+                    String.format("cannot convert value from %s", column.getType()));
         }
     }
 
     @Override
-    public void stringColumn(Column column)
-    {
+    public void stringColumn(Column column) {
         if (value == null) {
             pageBuilder.setNull(column);
         } else {
-            throw new DataException(String.format("cannot convert value from %s", column.getType()));
+            throw new DataException(
+                    String.format("cannot convert value from %s", column.getType()));
         }
     }
 
     @Override
-    public void timestampColumn(Column column)
-    {
+    public void timestampColumn(Column column) {
         if (value == null) {
             pageBuilder.setNull(column);
         } else {
-            throw new DataException(String.format("cannot convert value from %s", column.getType()));
+            throw new DataException(
+                    String.format("cannot convert value from %s", column.getType()));
         }
     }
 
     @Override
-    public void jsonColumn(Column column)
-    {
+    public void jsonColumn(Column column) {
         if (value == null) {
             pageBuilder.setNull(column);
         } else {
-            throw new DataException(String.format("cannot convert value from %s", column.getType()));
+            throw new DataException(
+                    String.format("cannot convert value from %s", column.getType()));
         }
     }
 }

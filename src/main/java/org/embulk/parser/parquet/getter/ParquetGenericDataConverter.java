@@ -1,49 +1,46 @@
 package org.embulk.parser.parquet.getter;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.util.Utf8;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 public class ParquetGenericDataConverter {
-    public static Value convert(Object genericData)
-    {
+    public static Value convert(Object genericData) {
         return toValue(genericData);
     }
 
     @SuppressWarnings("rawtypes")
-    private static Value toValue(Object rawValue)
-    {
+    private static Value toValue(Object rawValue) {
         if (rawValue instanceof Utf8) {
             return ValueFactory.newString(rawValue.toString());
         } else if (rawValue instanceof Integer) {
-            return ValueFactory.newInteger((Integer)rawValue);
+            return ValueFactory.newInteger((Integer) rawValue);
         } else if (rawValue instanceof Long) {
-            return ValueFactory.newInteger((Long)rawValue);
+            return ValueFactory.newInteger((Long) rawValue);
         } else if (rawValue instanceof Float) {
-            return ValueFactory.newFloat((Float)rawValue);
+            return ValueFactory.newFloat((Float) rawValue);
         } else if (rawValue instanceof Double) {
-            return ValueFactory.newFloat((Double)rawValue);
+            return ValueFactory.newFloat((Double) rawValue);
         } else if (rawValue instanceof Boolean) {
-            return ValueFactory.newBoolean((Boolean)rawValue);
+            return ValueFactory.newBoolean((Boolean) rawValue);
         } else if (rawValue instanceof GenericData.EnumSymbol) {
             return ValueFactory.newString(rawValue.toString());
         } else if (rawValue instanceof GenericData.Array) {
             List<Value> list = new ArrayList<>();
-            for (Object item : (GenericData.Array)rawValue) {
+            for (Object item : (GenericData.Array) rawValue) {
                 list.add(toValue(item));
             }
             return ValueFactory.newArray(list);
         } else if (rawValue instanceof ArrayList) {
             List<Value> list = new ArrayList<>();
-            for (Object item : (ArrayList)rawValue) {
+            for (Object item : (ArrayList) rawValue) {
                 list.add(toValue(item));
             }
             return ValueFactory.newArray(list);

@@ -1,5 +1,7 @@
 package org.embulk.guess.parquet;
 
+import java.util.Collections;
+import java.util.List;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.embulk.config.ConfigDiff;
@@ -9,27 +11,25 @@ import org.embulk.spi.Buffer;
 import org.embulk.spi.GuessPlugin;
 import org.embulk.util.config.ConfigMapperFactory;
 
-import java.util.Collections;
-import java.util.List;
+public class ParquetGuessPlugin implements GuessPlugin {
 
-public class ParquetGuessPlugin
-        implements GuessPlugin {
-
-    private static final ConfigMapperFactory CONFIG_MAPPER_FACTORY = ConfigMapperFactory.builder().addDefaultModules().build();
+    private static final ConfigMapperFactory CONFIG_MAPPER_FACTORY =
+            ConfigMapperFactory.builder().addDefaultModules().build();
 
     @Override
     public ConfigDiff guess(ConfigSource config, Buffer sample) {
         final ConfigDiff configDiff = CONFIG_MAPPER_FACTORY.newConfigDiff();
 
         final byte[] bytes = copyBuffer(sample, sample.limit());
-        if(!ParquetUtil.isParquetFile(bytes)) {
+        if (!ParquetUtil.isParquetFile(bytes)) {
             return configDiff;
         }
         final GenericRecord record = ParquetUtil.fetchRecord(bytes);
-        if(record == null) {
-            return  configDiff;
+        if (record == null) {
+            return configDiff;
         }
-        ConfigDiff parserConfig = configDiff.set("parser", Collections.emptyMap()).getNested("parser");
+        ConfigDiff parserConfig =
+                configDiff.set("parser", Collections.emptyMap()).getNested("parser");
         parserConfig.set("type", "parquet");
         final List<Schema.Field> fields = record.getSchema().getFields();
         parserConfig.set("columns", ParquetGuessUtil.createColumns(fields));

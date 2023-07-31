@@ -1,5 +1,7 @@
 package org.embulk.parser.parquet;
 
+import java.util.Arrays;
+import java.util.List;
 import org.apache.avro.generic.GenericRecord;
 import org.embulk.config.ConfigSource;
 import org.embulk.config.TaskSource;
@@ -12,13 +14,11 @@ import org.embulk.util.config.units.SchemaConfig;
 import org.embulk.util.file.FileInputInputStream;
 import org.embulk.util.timestamp.TimestampFormatter;
 
-import java.util.Arrays;
-import java.util.List;
-
 public class ParquetParserPlugin implements ParserPlugin {
-    static final int READ_BUFFER_SIZE = 100*1024*1024;
+    static final int READ_BUFFER_SIZE = 100 * 1024 * 1024;
 
-    private static final ConfigMapperFactory CONFIG_MAPPER_FACTORY = ConfigMapperFactory.builder().addDefaultModules().build();
+    private static final ConfigMapperFactory CONFIG_MAPPER_FACTORY =
+            ConfigMapperFactory.builder().addDefaultModules().build();
 
     public interface PluginTask extends Task {
         @Config("columns")
@@ -41,32 +41,50 @@ public class ParquetParserPlugin implements ParserPlugin {
         control.run(task.toTaskSource(), schema);
     }
 
-    private PageBuilder newPageBuilder(BufferAllocator bufferAllocator, Schema schema, PageOutput output) {
+    private PageBuilder newPageBuilder(
+            BufferAllocator bufferAllocator, Schema schema, PageOutput output) {
         // TODO: use Exec.getPageBuilder(bufferAllocator, schema, output) after embulk v0.10
         return new PageBuilder(bufferAllocator, schema, output);
     }
 
-    public void run(TaskSource taskSource, Schema schema, FileInput input, PageOutput output, BufferAllocator bufferAllocator) {
+    public void run(
+            TaskSource taskSource,
+            Schema schema,
+            FileInput input,
+            PageOutput output,
+            BufferAllocator bufferAllocator) {
         final TaskMapper taskMapper = CONFIG_MAPPER_FACTORY.createTaskMapper();
         final PluginTask task = taskMapper.map(taskSource, PluginTask.class);
 
         final ConfigMapper configMapper = CONFIG_MAPPER_FACTORY.createConfigMapper();
         final List<ColumnConfig> columnConfigs = task.getColumns().getColumns();
-        final TimestampFormatter[] timestampFormatters = ParquetParserUtil.newTimestampFormatters(
-                configMapper, columnConfigs, task.getDefaultTimestampFormat(), task.getDefaultTimeZoneId());
-        final TimestampUnit[] timestampUnits = ParquetParserUtil.newTimestampUnits(configMapper, columnConfigs);
+        final TimestampFormatter[] timestampFormatters =
+                ParquetParserUtil.newTimestampFormatters(
+                        configMapper,
+                        columnConfigs,
+                        task.getDefaultTimestampFormat(),
+                        task.getDefaultTimeZoneId());
+        final TimestampUnit[] timestampUnits =
+                ParquetParserUtil.newTimestampUnits(configMapper, columnConfigs);
 
         try (FileInputInputStream fileInputInputStream = new FileInputInputStream(input);
-             final PageBuilder pageBuilder = newPageBuilder(bufferAllocator, schema, output)) {
-            while(fileInputInputStream.nextFile()) {
-                final List<GenericRecord> records = ParquetUtil.fetchRecords(readAllBytes(fileInputInputStream));
-                for (GenericRecord record: records) {
-                    ParquetParserUtil.addRecordToPageBuilder(record, pageBuilder, schema.getColumns(), timestampFormatters, timestampUnits);
+                final PageBuilder pageBuilder = newPageBuilder(bufferAllocator, schema, output)) {
+            while (fileInputInputStream.nextFile()) {
+                final List<GenericRecord> records =
+                        ParquetUtil.fetchRecords(readAllBytes(fileInputInputStream));
+                for (GenericRecord record : records) {
+                    ParquetParserUtil.addRecordToPageBuilder(
+                            record,
+                            pageBuilder,
+                            schema.getColumns(),
+                            timestampFormatters,
+                            timestampUnits);
                 }
             }
             pageBuilder.finish();
         }
     }
+
     @Override
     public void run(TaskSource taskSource, Schema schema, FileInput input, PageOutput output) {
         // When test, Exec.getBufferAllocator cause error, use runtime.getBufferAllocator
