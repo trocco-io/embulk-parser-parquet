@@ -38,15 +38,11 @@ public class ParquetGuessUtil {
 
     static public Type convertType(Schema.Field field) {
         Schema.Type type = field.schema().getType();
-        if (type == Schema.Type.UNION) {
-            for (Schema schema : field.schema().getTypes()) {
-                Schema.Type t = schema.getType();
-                if (t != Schema.Type.NULL) {
-                    type = t;
-                    break;
-                }
-            }
+        if(type != Schema.Type.UNION) {
+            return TYPE_MAP.get(type);
         }
-        return TYPE_MAP.get(type);
+
+        Schema.Type firstNotNullTypeInTypes = field.schema().getTypes().stream().map(s -> s.getType()).filter(t -> t != Schema.Type.NULL).findFirst().orElse(null);
+        return TYPE_MAP.get(firstNotNullTypeInTypes);
     }
 }
