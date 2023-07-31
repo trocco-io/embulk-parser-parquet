@@ -12,9 +12,11 @@ import org.embulk.util.config.units.SchemaConfig;
 import org.embulk.util.file.FileInputInputStream;
 import org.embulk.util.timestamp.TimestampFormatter;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class ParquetParserPlugin implements ParserPlugin {
+    static final int READ_BUFFER_SIZE = 100*1024*1024;
 
     private static final ConfigMapperFactory CONFIG_MAPPER_FACTORY = ConfigMapperFactory.builder().addDefaultModules().build();
 
@@ -57,7 +59,7 @@ public class ParquetParserPlugin implements ParserPlugin {
         try (FileInputInputStream fileInputInputStream = new FileInputInputStream(input);
              final PageBuilder pageBuilder = newPageBuilder(bufferAllocator, schema, output)) {
             while(fileInputInputStream.nextFile()) {
-                final List<GenericRecord> records = ParquetUtil.fetchRecords(fileInputInputStream);
+                final List<GenericRecord> records = ParquetUtil.fetchRecords(readAllBytes(fileInputInputStream));
                 for (GenericRecord record: records) {
                     ParquetParserUtil.addRecordToPageBuilder(record, pageBuilder, schema.getColumns(), timestampFormatters, timestampUnits);
                 }
@@ -69,5 +71,14 @@ public class ParquetParserPlugin implements ParserPlugin {
     public void run(TaskSource taskSource, Schema schema, FileInput input, PageOutput output) {
         // When test, Exec.getBufferAllocator cause error, use runtime.getBufferAllocator
         run(taskSource, schema, input, output, Exec.getBufferAllocator());
+    }
+
+    private byte[] readAllBytes(FileInputInputStream fileInputInputStream) {
+        byte[] buffer = new byte[READ_BUFFER_SIZE];
+        int len = fileInputInputStream.read(buffer, 0, buffer.length);
+        if (len == READ_BUFFER_SIZE) {
+            throw new RuntimeException(String.format("over buffer size %d", READ_BUFFER_SIZE));
+        }
+        return Arrays.copyOf(buffer, len);
     }
 }

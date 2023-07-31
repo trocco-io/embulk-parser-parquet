@@ -9,7 +9,6 @@ import org.embulk.spi.Buffer;
 import org.embulk.spi.GuessPlugin;
 import org.embulk.util.config.ConfigMapperFactory;
 
-import java.io.ByteArrayInputStream;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,8 +25,7 @@ public class ParquetGuessPlugin
         if(!ParquetUtil.isParquetFile(bytes)) {
             return configDiff;
         }
-        final ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
-        final GenericRecord record = ParquetUtil.fetchRecord(inputStream);
+        final GenericRecord record = ParquetUtil.fetchRecord(bytes);
         if(record == null) {
             return  configDiff;
         }
