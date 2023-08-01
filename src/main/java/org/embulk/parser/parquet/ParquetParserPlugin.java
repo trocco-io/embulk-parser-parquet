@@ -1,5 +1,6 @@
 package org.embulk.parser.parquet;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.avro.generic.GenericRecord;
@@ -15,7 +16,8 @@ import org.embulk.util.file.FileInputInputStream;
 import org.embulk.util.timestamp.TimestampFormatter;
 
 public class ParquetParserPlugin implements ParserPlugin {
-    static final int READ_BUFFER_SIZE = 100 * 1024 * 1024;
+
+    static final int READ_BUFFER_SIZE = 1024 * 1024;
 
     private static final ConfigMapperFactory CONFIG_MAPPER_FACTORY =
             ConfigMapperFactory.builder().addDefaultModules().build();
@@ -93,10 +95,11 @@ public class ParquetParserPlugin implements ParserPlugin {
 
     private byte[] readAllBytes(FileInputInputStream fileInputInputStream) {
         byte[] buffer = new byte[READ_BUFFER_SIZE];
-        int len = fileInputInputStream.read(buffer, 0, buffer.length);
-        if (len == READ_BUFFER_SIZE) {
-            throw new RuntimeException(String.format("over buffer size %d", READ_BUFFER_SIZE));
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        int read;
+        while ((read = fileInputInputStream.read(buffer, 0, READ_BUFFER_SIZE)) >= 0) {
+            byteArrayOutputStream.write(buffer, 0, read);
         }
-        return Arrays.copyOf(buffer, len);
+        return byteArrayOutputStream.toByteArray();
     }
 }
