@@ -1,7 +1,6 @@
 package org.embulk.parser.parquet;
 
 import java.io.ByteArrayOutputStream;
-import java.util.Arrays;
 import java.util.List;
 import org.apache.avro.generic.GenericRecord;
 import org.embulk.config.ConfigSource;
