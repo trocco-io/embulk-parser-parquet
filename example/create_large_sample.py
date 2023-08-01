@@ -1,8 +1,10 @@
 ### example
 ## parquet
+# > python example/create_large_sample.py 300000 ./tmp/sample300000.parquet # 9.3MB
 # > python example/create_large_sample.py 2800000 ./tmp/sample2800000.parquet # 81MB
 # > python example/create_large_sample.py 34000000 ./tmp/sample34000000.parquet # 979MB
 ## csv
+# > python example/create_large_sample.py 110000 ./tmp/sample110000.csv # 8.8MB
 # > python example/create_large_sample.py 1000000 ./tmp/sample1000000.csv # 80MB
 # > python example/create_large_sample.py 12000000 ./tmp/sample12000000.csv # 963MB
 
@@ -15,16 +17,13 @@ import sys
 import os
 import csv
 
-# parquet
-# size = 32000000 921MB
-# size = 10000000 288MB
 size = int(sys.argv[1])
 filepath = sys.argv[2]
 _, ext = os.path.splitext(filepath)
 
 integers = [random.randint(0, 1000000) for _ in range(size)]
 floats = [random.random() for _ in range(size)]
-strings = [str(uuid.uuid1()) for _ in range(size)]
+strings = [str(uuid.uuid4()) for _ in range(size)]
 
 def str_time_prop(start, end, time_format, prop):
     """Get a time at a proportion of a range of two formatted times.
