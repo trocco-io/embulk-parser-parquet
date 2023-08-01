@@ -31,17 +31,20 @@ dependencies {
     compile "org.embulk:embulk-util-timestamp:0.2.1"
     compile "org.embulk:embulk-util-config:0.3.3"
 
-    compile 'org.apache.parquet:parquet-avro:1.9.0'
-    compile 'org.apache.parquet:parquet-hadoop:1.10.1'
-    compile 'org.apache.hadoop:hadoop-mapreduce-client-core:3.3.6'
+    compile 'org.apache.parquet:parquet-avro:1.13.1'
+    compile 'org.apache.parquet:parquet-hadoop:1.13.1'
+    compile('org.apache.hadoop:hadoop-mapreduce-client-core:3.3.6') { exclude group: "org.slf4j", module: "slf4j-log4j12" }
     compile 'org.apache.hadoop:hadoop-common:3.3.6'
+    compile "org.xerial.snappy:snappy-java:1.1.10.3"
 
     compile project(path: ":shadow-jackson-jq", configuration: 'shadow')
+    compile "org.slf4j:slf4j-log4j12:1.7.36"
 
     testCompile "junit:junit:4.+"
-    testCompile "org.embulk:embulk-junit4:0.10.49"
-    testCompile "org.embulk:embulk-core:0.10.49"
-    testCompile "org.embulk:embulk-deps:0.10.49"
+    testCompile("org.embulk:embulk-junit4:0.10.49") { exclude group: "org.slf4j", module: "slf4j-api" }
+    testCompile("org.embulk:embulk-core:0.10.49")  { exclude group: "org.slf4j", module: "slf4j-api" }
+    testCompile("org.embulk:embulk-deps:0.10.49") //{ exclude group: "org.slf4j", module: "slf4j-api" }
+    testCompile "org.slf4j:slf4j-api:1.7.36"
 }
 
 embulkPlugin {

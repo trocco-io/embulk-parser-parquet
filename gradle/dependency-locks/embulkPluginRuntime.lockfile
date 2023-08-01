@@ -11,6 +11,7 @@ com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.12.7
 com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.12.7
 com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.12.7
 com.fasterxml.woodstox:woodstox-core:5.4.0
+com.github.luben:zstd-jni:1.5.0-1
 com.github.pjfanning:jersey-json:1.20
 com.github.stephenc.jcip:jcip-annotations:1.0-1
 com.google.code.findbugs:jsr305:3.0.2
@@ -34,7 +35,6 @@ com.sun.jersey:jersey-core:1.19.4
 com.sun.jersey:jersey-server:1.19.4
 com.sun.jersey:jersey-servlet:1.19.4
 com.sun.xml.bind:jaxb-impl:2.2.3-1
-com.thoughtworks.paranamer:paranamer:2.7
 commons-beanutils:commons-beanutils:1.9.4
 commons-cli:commons-cli:1.2
 commons-codec:commons-codec:1.15
@@ -44,6 +44,7 @@ commons-logging:commons-logging:1.2
 commons-net:commons-net:3.9.0
 commons-pool:commons-pool:1.6
 dnsjava:dnsjava:2.1.7
+io.airlift:aircompressor:0.21
 io.dropwizard.metrics:metrics-core:3.2.4
 io.netty:netty-buffer:4.1.63.Final
 io.netty:netty-codec:4.1.63.Final
@@ -54,7 +55,6 @@ io.netty:netty-transport-native-epoll:4.1.63.Final
 io.netty:netty-transport-native-unix-common:4.1.63.Final
 io.netty:netty-transport:4.1.63.Final
 io.netty:netty:3.10.6.Final
-it.unimi.dsi:fastutil:6.5.7
 jakarta.activation:jakarta.activation-api:1.2.1
 jakarta.xml.bind:jakarta.xml.bind-api:2.3.2
 javax.inject:javax.inject:1
@@ -64,7 +64,7 @@ javax.validation:validation-api:1.1.0.Final
 javax.ws.rs:jsr311-api:1.1.1
 javax.xml.bind:jaxb-api:2.2.11
 log4j:log4j:1.2.17
-org.apache.avro:avro:1.8.0
+org.apache.avro:avro:1.11.1
 org.apache.commons:commons-compress:1.21
 org.apache.commons:commons-configuration2:2.8.0
 org.apache.commons:commons-lang3:3.12.0
@@ -100,19 +100,17 @@ org.apache.kerby:kerby-pkix:1.0.1
 org.apache.kerby:kerby-util:1.0.1
 org.apache.kerby:kerby-xdr:1.0.1
 org.apache.kerby:token-provider:1.0.1
-org.apache.parquet:parquet-avro:1.9.0
-org.apache.parquet:parquet-column:1.10.1
-org.apache.parquet:parquet-common:1.10.1
-org.apache.parquet:parquet-encoding:1.10.1
-org.apache.parquet:parquet-format:2.4.0
-org.apache.parquet:parquet-hadoop:1.10.1
-org.apache.parquet:parquet-jackson:1.10.1
-org.apache.yetus:audience-annotations:0.5.0
+org.apache.parquet:parquet-avro:1.13.1
+org.apache.parquet:parquet-column:1.13.1
+org.apache.parquet:parquet-common:1.13.1
+org.apache.parquet:parquet-encoding:1.13.1
+org.apache.parquet:parquet-format-structures:1.13.1
+org.apache.parquet:parquet-hadoop:1.13.1
+org.apache.parquet:parquet-jackson:1.13.1
+org.apache.yetus:audience-annotations:0.13.0
 org.apache.zookeeper:zookeeper-jute:3.6.3
 org.apache.zookeeper:zookeeper:3.6.3
 org.checkerframework:checker-qual:2.5.2
-org.codehaus.jackson:jackson-core-asl:1.9.13
-org.codehaus.jackson:jackson-mapper-asl:1.9.13
 org.codehaus.jettison:jettison:1.1
 org.codehaus.mojo:animal-sniffer-annotations:1.17
 org.codehaus.woodstox:stax2-api:4.2.1
@@ -138,7 +136,5 @@ org.jetbrains.kotlin:kotlin-stdlib-common:1.4.10
 org.jetbrains.kotlin:kotlin-stdlib:1.4.10
 org.jline:jline:3.9.0
 org.slf4j:slf4j-api:1.7.36
-org.slf4j:slf4j-log4j12:1.7.25
 org.slf4j:slf4j-reload4j:1.7.36
-org.tukaani:xz:1.5
-org.xerial.snappy:snappy-java:1.1.8.2
+org.xerial.snappy:snappy-java:1.1.10.3
