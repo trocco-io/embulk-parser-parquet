@@ -1,8 +1,11 @@
 package org.embulk.parser.parquet;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Stream;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.parquet.hadoop.ParquetReader;
+import org.embulk.parquet.ParquetUtil;
 import org.embulk.parser.parquet.getter.BaseColumnGetter;
 import org.embulk.parser.parquet.getter.ColumnGetterFactory;
 import org.embulk.parser.parquet.getter.TimestampUnit;
@@ -16,8 +19,31 @@ import org.embulk.util.config.units.ColumnConfig;
 import org.embulk.util.timestamp.TimestampFormatter;
 
 public class ParquetParserUtil {
+    public static void addRecordsToPageBuilder(
+            byte[] bytes,
+            PageBuilder pageBuilder,
+            List<Column> columns,
+            TimestampFormatter[] timestampFormatters,
+            TimestampUnit[] timestampUnits) {
+        final ParquetReader<Object> reader = ParquetUtil.buildReader(bytes);
+        try {
+            while (true) {
+                final Object obj = reader.read();
+                if (obj == null) {
+                    return;
+                }
+                if (obj instanceof GenericRecord) {
+                    GenericRecord record = (GenericRecord) obj;
+                    addRecordToPageBuilder(
+                            record, pageBuilder, columns, timestampFormatters, timestampUnits);
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-    public static void addRecordToPageBuilder(
+    private static void addRecordToPageBuilder(
             GenericRecord record,
             PageBuilder pageBuilder,
             List<Column> columns,

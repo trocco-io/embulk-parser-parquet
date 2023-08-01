@@ -2,10 +2,8 @@ package org.embulk.parser.parquet;
 
 import java.io.ByteArrayOutputStream;
 import java.util.List;
-import org.apache.avro.generic.GenericRecord;
 import org.embulk.config.ConfigSource;
 import org.embulk.config.TaskSource;
-import org.embulk.parquet.ParquetUtil;
 import org.embulk.parser.parquet.getter.TimestampUnit;
 import org.embulk.spi.*;
 import org.embulk.util.config.*;
@@ -71,16 +69,12 @@ public class ParquetParserPlugin implements ParserPlugin {
         try (FileInputInputStream fileInputInputStream = new FileInputInputStream(input);
                 final PageBuilder pageBuilder = newPageBuilder(bufferAllocator, schema, output)) {
             while (fileInputInputStream.nextFile()) {
-                final List<GenericRecord> records =
-                        ParquetUtil.fetchRecords(readAllBytes(fileInputInputStream));
-                for (GenericRecord record : records) {
-                    ParquetParserUtil.addRecordToPageBuilder(
-                            record,
-                            pageBuilder,
-                            schema.getColumns(),
-                            timestampFormatters,
-                            timestampUnits);
-                }
+                ParquetParserUtil.addRecordsToPageBuilder(
+                        readAllBytes(fileInputInputStream),
+                        pageBuilder,
+                        schema.getColumns(),
+                        timestampFormatters,
+                        timestampUnits);
             }
             pageBuilder.finish();
         }

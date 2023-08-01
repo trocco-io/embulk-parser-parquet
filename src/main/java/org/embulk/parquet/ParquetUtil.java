@@ -44,26 +44,7 @@ public class ParquetUtil {
         }
     }
 
-    public static List<GenericRecord> fetchRecords(byte[] bytes) {
-        final ParquetReader<Object> reader = buildReader(bytes);
-        List<GenericRecord> records = new ArrayList<>();
-        try {
-            while (true) {
-                final Object obj = reader.read();
-                if (obj == null) {
-                    break;
-                }
-                if (obj instanceof GenericRecord) {
-                    records.add(((GenericRecord) obj));
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return records;
-    }
-
-    private static ParquetReader<Object> buildReader(byte[] bytes) {
+    public static ParquetReader<Object> buildReader(byte[] bytes) {
         InputFile parquetStream = new ParquetStream(bytes);
         try {
             Builder<Object> builder = new Builder<>(parquetStream);
