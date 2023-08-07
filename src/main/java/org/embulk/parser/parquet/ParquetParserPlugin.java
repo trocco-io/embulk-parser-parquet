@@ -1,6 +1,5 @@
 package org.embulk.parser.parquet;
 
-import java.io.ByteArrayOutputStream;
 import java.util.List;
 import org.embulk.config.ConfigSource;
 import org.embulk.config.TaskSource;
@@ -70,7 +69,7 @@ public class ParquetParserPlugin implements ParserPlugin {
                 final PageBuilder pageBuilder = newPageBuilder(bufferAllocator, schema, output)) {
             while (fileInputInputStream.nextFile()) {
                 ParquetParserUtil.addRecordsToPageBuilder(
-                        readAllBytes(fileInputInputStream),
+                        fileInputInputStream,
                         pageBuilder,
                         schema.getColumns(),
                         timestampFormatters,
@@ -84,15 +83,5 @@ public class ParquetParserPlugin implements ParserPlugin {
     public void run(TaskSource taskSource, Schema schema, FileInput input, PageOutput output) {
         // When test, Exec.getBufferAllocator cause error, use runtime.getBufferAllocator
         run(taskSource, schema, input, output, Exec.getBufferAllocator());
-    }
-
-    private byte[] readAllBytes(FileInputInputStream fileInputInputStream) {
-        byte[] buffer = new byte[READ_BUFFER_SIZE];
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        int read;
-        while ((read = fileInputInputStream.read(buffer, 0, READ_BUFFER_SIZE)) >= 0) {
-            byteArrayOutputStream.write(buffer, 0, read);
-        }
-        return byteArrayOutputStream.toByteArray();
     }
 }

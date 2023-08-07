@@ -1,6 +1,7 @@
 package org.embulk.parser.parquet;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Stream;
 import org.apache.avro.generic.GenericRecord;
@@ -20,12 +21,12 @@ import org.embulk.util.timestamp.TimestampFormatter;
 
 public class ParquetParserUtil {
     public static void addRecordsToPageBuilder(
-            byte[] bytes,
+            InputStream inputStream,
             PageBuilder pageBuilder,
             List<Column> columns,
             TimestampFormatter[] timestampFormatters,
             TimestampUnit[] timestampUnits) {
-        final ParquetReader<Object> reader = ParquetUtil.buildReader(bytes);
+        final ParquetReader<Object> reader = ParquetUtil.buildReader(inputStream);
         try {
             while (true) {
                 final Object obj = reader.read();

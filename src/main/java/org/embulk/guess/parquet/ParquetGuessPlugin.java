@@ -1,5 +1,6 @@
 package org.embulk.guess.parquet;
 
+import java.io.ByteArrayInputStream;
 import java.util.Collections;
 import java.util.List;
 import org.apache.avro.Schema;
@@ -12,7 +13,6 @@ import org.embulk.spi.GuessPlugin;
 import org.embulk.util.config.ConfigMapperFactory;
 
 public class ParquetGuessPlugin implements GuessPlugin {
-
     private static final ConfigMapperFactory CONFIG_MAPPER_FACTORY =
             ConfigMapperFactory.builder().addDefaultModules().build();
 
@@ -24,7 +24,8 @@ public class ParquetGuessPlugin implements GuessPlugin {
         if (!ParquetUtil.isParquetFile(bytes)) {
             return configDiff;
         }
-        final GenericRecord record = ParquetUtil.fetchRecord(bytes);
+        final ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
+        final GenericRecord record = ParquetGuessUtil.fetchRecord(inputStream);
         if (record == null) {
             return configDiff;
         }

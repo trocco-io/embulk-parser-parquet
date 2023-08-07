@@ -1,16 +1,11 @@
 package org.embulk.parquet;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.parquet.avro.AvroReadSupport;
+import java.io.*;
+import java.nio.file.Files;
+import org.apache.commons.io.IOUtils;
+import org.apache.hadoop.fs.Path;
+import org.apache.parquet.avro.AvroParquetReader;
 import org.apache.parquet.hadoop.ParquetReader;
-import org.apache.parquet.hadoop.api.ReadSupport;
-import org.apache.parquet.io.DelegatingSeekableInputStream;
-import org.apache.parquet.io.InputFile;
-import org.apache.parquet.io.SeekableInputStream;
 
 public class ParquetUtil {
     private static final byte[] PARQUET_HEADER = {0x50, 0x41, 0x52, 0x31};
@@ -27,87 +22,31 @@ public class ParquetUtil {
         return true;
     }
 
-    public static GenericRecord fetchRecord(byte[] bytes) {
-        final ParquetReader<Object> reader = buildReader(bytes);
+    public static ParquetReader<Object> buildReader(InputStream inputStream) {
+        final String path = copyToFile(inputStream).getAbsolutePath();
+        AvroParquetReader.Builder<Object> builder = AvroParquetReader.builder(new Path(path));
+        org.apache.hadoop.conf.Configuration configuration =
+                new org.apache.hadoop.conf.Configuration();
+        configuration.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
         try {
-            while (true) {
-                final Object obj = reader.read();
-                if (obj == null) {
-                    return null;
-                }
-                if (obj instanceof GenericRecord) {
-                    return ((GenericRecord) obj);
-                }
-            }
+            return builder.withConf(configuration).build();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static ParquetReader<Object> buildReader(byte[] bytes) {
-        InputFile parquetStream = new ParquetStream(bytes);
+    private static File copyToFile(InputStream input) {
         try {
-            Builder<Object> builder = new Builder<>(parquetStream);
-            return builder.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName())
-                    .build();
+            final File tmpfile = Files.createTempFile("embulk-input-parquet.", ".tmp").toFile();
+            tmpfile.deleteOnExit();
+            try (FileOutputStream output = new FileOutputStream(tmpfile)) {
+                IOUtils.copy(input, output);
+            } finally {
+                input.close();
+            }
+            return tmpfile;
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    // AVROParquetReader.java
-    public static class Builder<T> extends ParquetReader.Builder<T> {
-        private Builder(InputFile file) {
-            super(file);
-        }
-
-        @Override
-        protected ReadSupport<T> getReadSupport() {
-            conf.setBoolean(AvroReadSupport.AVRO_COMPATIBILITY, false);
-            return new AvroReadSupport<T>(null);
-        }
-    }
-
-    // https://stackoverflow.com/questions/58141248/read-parquet-data-from-bytearrayoutputstream-instead-of-file
-    private static class ParquetStream implements InputFile {
-        private final byte[] data;
-
-        private class SeekableByteArrayInputStream extends ByteArrayInputStream {
-            public SeekableByteArrayInputStream(byte[] buf) {
-                super(buf);
-            }
-
-            public void setPos(int pos) {
-                this.pos = pos;
-            }
-
-            public int getPos() {
-                return this.pos;
-            }
-        }
-
-        public ParquetStream(byte[] bytes) {
-            this.data = bytes;
-        }
-
-        @Override
-        public long getLength() {
-            return this.data.length;
-        }
-
-        @Override
-        public SeekableInputStream newStream() {
-            return new DelegatingSeekableInputStream(new SeekableByteArrayInputStream(this.data)) {
-                @Override
-                public void seek(long newPos) {
-                    ((SeekableByteArrayInputStream) this.getStream()).setPos((int) newPos);
-                }
-
-                @Override
-                public long getPos() {
-                    return ((SeekableByteArrayInputStream) this.getStream()).getPos();
-                }
-            };
         }
     }
 }
