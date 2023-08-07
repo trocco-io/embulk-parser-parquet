@@ -13,8 +13,6 @@ import org.embulk.util.timestamp.TimestampFormatter;
 
 public class ParquetParserPlugin implements ParserPlugin {
 
-    static final int READ_BUFFER_SIZE = 1024 * 1024;
-
     private static final ConfigMapperFactory CONFIG_MAPPER_FACTORY =
             ConfigMapperFactory.builder().addDefaultModules().build();
 
