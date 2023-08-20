@@ -80,13 +80,17 @@ public class TestParquetParserPlugin {
         return fetchRecords(columnSchema, null, null);
     }
 
-    private List<Object[]> fetchRecords(SchemaConfig columnSchema, String defaultTimezone, String defaultTimestampFormat) {
+    private List<Object[]> fetchRecords(
+            SchemaConfig columnSchema, String defaultTimezone, String defaultTimestampFormat) {
         FileInput fileInput = fileInputs("src/test/resources/sample.parquet");
         return fetchRecords(fileInput, columnSchema, defaultTimezone, defaultTimestampFormat);
     }
 
-    private List<Object[]> fetchRecords(FileInput fileInput,
-            SchemaConfig columnSchema, String defaultTimezone, String defaultTimestampFormat) {
+    private List<Object[]> fetchRecords(
+            FileInput fileInput,
+            SchemaConfig columnSchema,
+            String defaultTimezone,
+            String defaultTimestampFormat) {
         TestPageBuilderReader.MockPageOutput mockPageOutput =
                 new TestPageBuilderReader.MockPageOutput();
         ParquetParserPlugin plugin = new ParquetParserPlugin();
@@ -216,7 +220,9 @@ public class TestParquetParserPlugin {
     @Test
     public void testRunFileInputWithMultipleIterator() {
         final SchemaConfig columnSchema = schema(column("id", LONG));
-        FileInput fileInput = fileInputs("src/test/resources/sample.parquet", "src/test/resources/sample.parquet");
+        FileInput fileInput =
+                fileInputs(
+                        "src/test/resources/sample.parquet", "src/test/resources/sample.parquet");
 
         List<Object[]> records = fetchRecords(fileInput, columnSchema, null, null);
         assertEquals(2, records.size());
