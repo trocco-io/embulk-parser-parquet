@@ -41,8 +41,6 @@ public class ParquetUtil {
             tmpfile.deleteOnExit();
             try (FileOutputStream output = new FileOutputStream(tmpfile)) {
                 IOUtils.copy(input, output);
-            } finally {
-                input.close();
             }
             return tmpfile;
         } catch (IOException e) {

@@ -80,7 +80,12 @@ public class TestParquetParserPlugin {
         return fetchRecords(columnSchema, null, null);
     }
 
-    private List<Object[]> fetchRecords(
+    private List<Object[]> fetchRecords(SchemaConfig columnSchema, String defaultTimezone, String defaultTimestampFormat) {
+        FileInput fileInput = fileInputs("src/test/resources/sample.parquet");
+        return fetchRecords(fileInput, columnSchema, defaultTimezone, defaultTimestampFormat);
+    }
+
+    private List<Object[]> fetchRecords(FileInput fileInput,
             SchemaConfig columnSchema, String defaultTimezone, String defaultTimestampFormat) {
         TestPageBuilderReader.MockPageOutput mockPageOutput =
                 new TestPageBuilderReader.MockPageOutput();
@@ -92,7 +97,6 @@ public class TestParquetParserPlugin {
         if (defaultTimestampFormat != null) {
             configSource.set("default_timestamp_format", defaultTimestampFormat);
         }
-        FileInput fileInput = fileInputs("src/test/resources/sample.parquet");
         BufferAllocator bufferAllocator = runtime.getBufferAllocator();
         plugin.transaction(
                 configSource,
@@ -207,5 +211,19 @@ public class TestParquetParserPlugin {
         assertEquals("1971-11-26 10:40:00 UTC", record[4].toString());
         assertEquals("[{\"item\":\"tag0\"},{\"item\":\"tag1\"}]", record[5].toString());
         assertEquals("{\"key0\":\"k\"}", record[6].toString());
+    }
+
+    @Test
+    public void testRunFileInputWithMultipleIterator() {
+        final SchemaConfig columnSchema = schema(column("id", LONG));
+        FileInput fileInput = fileInputs("src/test/resources/sample.parquet", "src/test/resources/sample.parquet");
+
+        List<Object[]> records = fetchRecords(fileInput, columnSchema, null, null);
+        assertEquals(2, records.size());
+
+        assertEquals(1, records.get(0).length);
+        assertEquals(1L, records.get(0)[0]);
+        assertEquals(1, records.get(1).length);
+        assertEquals(1L, records.get(1)[0]);
     }
 }
