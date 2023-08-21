@@ -8,14 +8,16 @@ import org.apache.parquet.avro.AvroParquetReader;
 import org.apache.parquet.hadoop.ParquetReader;
 
 public class ParquetUtil {
-    private static final byte[] PARQUET_HEADER = {0x50, 0x41, 0x52, 0x31};
+    private static final byte[] PARQUET_MAGIC_NUMBER = {0x50, 0x41, 0x52, 0x31};
 
     public static boolean isParquetFile(byte[] bytes) {
-        if (PARQUET_HEADER.length > bytes.length) {
+        if (PARQUET_MAGIC_NUMBER.length > bytes.length) {
             return false;
         }
-        for (int i = 0; i < PARQUET_HEADER.length; i++) {
-            if (PARQUET_HEADER[i] != bytes[i]) {
+        for (int i = 0; i < PARQUET_MAGIC_NUMBER.length; i++) {
+            if (PARQUET_MAGIC_NUMBER[i] != bytes[i]
+                    || PARQUET_MAGIC_NUMBER[i]
+                            != bytes[bytes.length - PARQUET_MAGIC_NUMBER.length + i]) {
                 return false;
             }
         }
