@@ -10,7 +10,7 @@ repositories {
 }
 
 group = "io.trocco"
-description = "An embulk output plugin to egest records as json via http/https."
+description = "Parquet parser plugin for Embulk."
 version = {
     def vd = versionDetails()
     if (vd.commitDistance == 0 && vd.lastTag ==~ /^[0-9]+\.[0-9]+\.[0-9]+(\.[a-zA-Z0-9]+)?/) {
