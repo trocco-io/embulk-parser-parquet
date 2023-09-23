@@ -38,9 +38,9 @@ public class ParquetGenericDataConverter {
                 list.add(toValue(item));
             }
             return ValueFactory.newArray(list);
-        } else if (rawValue instanceof ArrayList) {
+        } else if (rawValue instanceof List) {
             List<Value> list = new ArrayList<>();
-            for (Object item : (ArrayList) rawValue) {
+            for (Object item : (List) rawValue) {
                 list.add(toValue(item));
             }
             return ValueFactory.newArray(list);
@@ -54,9 +54,9 @@ public class ParquetGenericDataConverter {
                 map.put(keyValue, valValue);
             }
             return ValueFactory.newMap(map);
-        } else if (rawValue instanceof HashMap) {
+        } else if (rawValue instanceof Map) {
             Map<Value, Value> map = new HashMap<>();
-            HashMap casted = (HashMap) rawValue;
+            Map casted = (Map) rawValue;
             Set entries = casted.entrySet();
             for (Object entry : entries) {
                 Map.Entry et = (Map.Entry) entry;
