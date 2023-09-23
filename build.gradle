@@ -45,6 +45,7 @@ dependencies {
     testCompile("org.embulk:embulk-core:0.10.49")  { exclude group: "org.slf4j", module: "slf4j-api" }
     testCompile("org.embulk:embulk-deps:0.10.49") //{ exclude group: "org.slf4j", module: "slf4j-api" }
     testCompile "org.slf4j:slf4j-api:1.7.36"
+    testCompile "org.msgpack:msgpack-core:0.8.24"
 }
 
 embulkPlugin {
