@@ -1,6 +1,6 @@
 package org.embulk.guess.parquet;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,6 +37,12 @@ public class TestParquetGuessPlugin {
         assertNameAndType(columns.get(4), "datetime", "long");
         assertNameAndType(columns.get(5), "array", "json");
         assertNameAndType(columns.get(6), "object", "json");
+    }
+
+    @Test
+    public void testGuessInvalidFile() {
+        ConfigDiff configDiff = guess("/invalid.parquet");
+        assertTrue(configDiff.getNestedOrGetEmpty("parser").isEmpty());
     }
 
     private void assertNameAndType(Map column, String name, String type) {
