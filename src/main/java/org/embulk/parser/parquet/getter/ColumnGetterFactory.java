@@ -1,6 +1,10 @@
 package org.embulk.parser.parquet.getter;
 
+import static org.embulk.spi.type.Types.LONG;
+import static org.embulk.spi.type.Types.STRING;
+
 import org.apache.avro.Schema;
+import org.embulk.parquet.ParquetUtil;
 import org.embulk.spi.Column;
 import org.embulk.spi.DataException;
 import org.embulk.spi.PageBuilder;
@@ -28,20 +32,7 @@ public class ColumnGetterFactory {
         final TimestampFormatter timestampFormatter = timestampFormatters[index];
         final TimestampUnit timestampUnit = timestampUnits[index];
         final Schema fieldSchema = parquetSchema.getField(column.getName()).schema();
-        final Schema.Type type;
-        if (fieldSchema.getType() == Schema.Type.UNION) {
-            Schema schema =
-                    fieldSchema.getTypes().stream()
-                            .filter(x -> x.getType() != Schema.Type.NULL)
-                            .findFirst()
-                            .orElse(null);
-            if (schema == null) {
-                throw new DataException("UNION must contain not null type.");
-            }
-            type = schema.getType();
-        } else {
-            type = fieldSchema.getType();
-        }
+        final Schema.Type type = ParquetUtil.fetchType(fieldSchema);
         return getColumnGetterFromTypeName(type, timestampFormatter, timestampUnit);
     }
 
@@ -66,7 +57,6 @@ public class ColumnGetterFactory {
             case MAP:
             case RECORD:
                 return new GenericDataColumnGetter(pageBuilder);
-            case BYTES:
             default:
                 throw new DataException(String.format("%s is not supported", type.getName()));
         }
