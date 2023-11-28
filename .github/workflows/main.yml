@@ -39,7 +39,7 @@ jobs:
           ruby-version: jruby
 
       - name: push gem
-          if: startsWith( github.ref, 'refs/tags/' )
+        if: startsWith( github.ref, 'refs/tags/' )
         uses: trocco-io/push-gem-to-gpr-action@v1
         with:
           language: java
