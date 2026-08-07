@@ -32,6 +32,10 @@ public class ParquetUtil {
         TYPE_MAP.put(Schema.Type.MAP, Types.JSON);
         TYPE_MAP.put(Schema.Type.ARRAY, Types.JSON);
         TYPE_MAP.put(Schema.Type.RECORD, Types.JSON);
+        // Parquet BYTE_ARRAY / FIXED_LEN_BYTE_ARRAY without a string annotation. Read as a
+        // hexadecimal string, or as a decimal number when annotated with the decimal logical type.
+        TYPE_MAP.put(Schema.Type.BYTES, Types.STRING);
+        TYPE_MAP.put(Schema.Type.FIXED, Types.STRING);
     }
 
     public static boolean isParquetFile(byte[] bytes) {
@@ -77,15 +81,23 @@ public class ParquetUtil {
         return TYPE_MAP.get(fetchType(schema));
     }
 
+    /**
+     * Resolves a UNION schema into its first non-NULL branch. Unlike {@link #fetchType}, this keeps
+     * the logical type annotation of the branch, which is needed to tell a plain byte array from a
+     * decimal. Non-UNION schemas are returned as is.
+     */
+    public static Schema resolveSchema(Schema schema) {
+        if (schema.getType() != Schema.Type.UNION) {
+            return schema;
+        }
+        return schema.getTypes().stream()
+                .filter(s -> s.getType() != Schema.Type.NULL)
+                .findFirst()
+                .orElse(schema);
+    }
+
     public static Schema.Type fetchType(Schema schema) {
-        final Schema.Type type =
-                schema.getType() == Schema.Type.UNION
-                        ? schema.getTypes().stream()
-                                .map(s -> s.getType())
-                                .filter(t -> t != Schema.Type.NULL)
-                                .findFirst()
-                                .orElse(null)
-                        : schema.getType();
+        final Schema.Type type = resolveSchema(schema).getType();
         if (!TYPE_MAP.containsKey(type)) {
             throw new DataException(String.format("%s is not supported", type.getName()));
         }

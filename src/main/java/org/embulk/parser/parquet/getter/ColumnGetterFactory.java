@@ -3,6 +3,8 @@ package org.embulk.parser.parquet.getter;
 import static org.embulk.spi.type.Types.LONG;
 import static org.embulk.spi.type.Types.STRING;
 
+import org.apache.avro.LogicalType;
+import org.apache.avro.LogicalTypes;
 import org.apache.avro.Schema;
 import org.embulk.parquet.ParquetUtil;
 import org.embulk.spi.Column;
@@ -28,16 +30,25 @@ public class ColumnGetterFactory {
     }
 
     public BaseColumnGetter newColumnGetter(Column column) {
+        final Schema.Field field = parquetSchema.getField(column.getName());
+        if (field == null) {
+            throw new DataException(
+                    String.format(
+                            "column '%s' is not found in the parquet schema", column.getName()));
+        }
         int index = column.getIndex();
         final TimestampFormatter timestampFormatter = timestampFormatters[index];
         final TimestampUnit timestampUnit = timestampUnits[index];
-        final Schema fieldSchema = parquetSchema.getField(column.getName()).schema();
+        final Schema fieldSchema = ParquetUtil.resolveSchema(field.schema());
         final Schema.Type type = ParquetUtil.fetchType(fieldSchema);
-        return getColumnGetterFromTypeName(type, timestampFormatter, timestampUnit);
+        return getColumnGetterFromTypeName(type, fieldSchema, timestampFormatter, timestampUnit);
     }
 
     private BaseColumnGetter getColumnGetterFromTypeName(
-            Schema.Type type, TimestampFormatter timestampFormatter, TimestampUnit timestampUnit) {
+            Schema.Type type,
+            Schema fieldSchema,
+            TimestampFormatter timestampFormatter,
+            TimestampUnit timestampUnit) {
         switch (type) {
             case STRING:
             case ENUM:
@@ -53,6 +64,17 @@ public class ColumnGetterFactory {
                 return new DoubleColumnGetter(pageBuilder, timestampUnit);
             case BOOLEAN:
                 return new BooleanColumnGetter(pageBuilder);
+            case BYTES:
+            case FIXED:
+                {
+                    final LogicalType logicalType =
+                            LogicalTypes.fromSchemaIgnoreInvalid(fieldSchema);
+                    if (logicalType instanceof LogicalTypes.Decimal) {
+                        return new DecimalColumnGetter(
+                                pageBuilder, ((LogicalTypes.Decimal) logicalType).getScale());
+                    }
+                    return new BytesColumnGetter(pageBuilder);
+                }
             case ARRAY:
             case MAP:
             case RECORD:

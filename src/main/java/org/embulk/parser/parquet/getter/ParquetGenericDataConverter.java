@@ -1,5 +1,6 @@
 package org.embulk.parser.parquet.getter;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericFixed;
 import org.apache.avro.util.Utf8;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
@@ -32,6 +34,10 @@ public class ParquetGenericDataConverter {
             return ValueFactory.newBoolean((Boolean) rawValue);
         } else if (rawValue instanceof GenericData.EnumSymbol) {
             return ValueFactory.newString(rawValue.toString());
+        } else if (rawValue instanceof ByteBuffer || rawValue instanceof GenericFixed) {
+            // Nested BYTES / FIXED, read as a hexadecimal string like BytesColumnGetter does.
+            return ValueFactory.newString(
+                    BytesColumnGetter.toHex(BytesColumnGetter.toBytes(rawValue)));
         } else if (rawValue instanceof GenericData.Array) {
             List<Value> list = new ArrayList<>();
             for (Object item : (GenericData.Array) rawValue) {

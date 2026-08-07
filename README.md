@@ -15,6 +15,32 @@ Parquet parser plugin for Embulk.
 * **default_timezone**: Default timezone of the timestamp (string, default: UTC)
 * **default_timestamp_format**: Default timestamp format of the timestamp (string, default: `%Y-%m-%d %H:%M:%S.%N %z`)
 
+### Binary columns
+
+A Parquet `BYTE_ARRAY` or `FIXED_LEN_BYTE_ARRAY` column that has **no string annotation** is read as
+a **lowercase hexadecimal string**, and guess reports it as `string`. Only `string` is supported for
+those columns; asking for `long`, `double`, `boolean`, `timestamp` or `json` raises a
+`DataException` instead of silently producing a wrong value.
+
+When the column is annotated with the **`DECIMAL` logical type**, the two's complement byte array is
+decoded into a decimal number instead, so guess still reports `string` but the value is the plain
+decimal representation (for example `18446744073709551615`, not its hexadecimal). Such a column can
+also be read as `double`, or as `long` when the value has an exact long representation.
+
+This matters for files produced by the Amazon RDS/Aurora snapshot export to S3, which maps
+
+| MySQL source type | Parquet type | read as |
+|---|---|---|
+| `POINT`, `GEOMETRY`, `POLYGON`, `LINESTRING`, `MULTI*` | `BYTE_ARRAY` (no annotation) | hexadecimal string of the raw bytes, i.e. the 4 byte SRID followed by the WKB |
+| `BINARY`, `VARBINARY`, `BLOB`, `TINY`/`MEDIUM`/`LONGBLOB`, `BIT` | `BYTE_ARRAY` (no annotation) | hexadecimal string |
+| `CHAR` | `BYTE_ARRAY` (no annotation) | hexadecimal string — note that `VARCHAR` and `TEXT` do carry a string annotation and stay text |
+| `BIGINT UNSIGNED`, large `DECIMAL`/`NUMERIC` | `FIXED_LEN_BYTE_ARRAY` + `DECIMAL(p,s)` | decimal number |
+
+Hexadecimal was chosen over base64 so the value can be fed straight into the geospatial functions of
+the destination warehouse, for example Amazon Redshift `ST_GeomFromWKB(col)`, which takes a `VARCHAR`
+holding a hexadecimal WKB. Note that MySQL prefixes its geometry values with a 4 byte SRID, so
+`SUBSTRING(col, 9)` may be needed before handing the value over.
+
 support `timestamp_unit` type is below.
 
 - "Second"

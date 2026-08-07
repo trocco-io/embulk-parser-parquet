@@ -6,6 +6,7 @@ import static org.junit.Assert.assertThrows;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import org.apache.avro.LogicalTypes;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.embulk.spi.DataException;
@@ -42,12 +43,20 @@ public class TestParquetUtil {
 
         assertEquals(Types.DOUBLE, convertedType(unionSchema(Type.NULL, Type.FLOAT)));
 
-        assertThrows(DataException.class, () -> convertedType(Schema.create(Type.BYTES)));
+        // Parquet BYTE_ARRAY / FIXED_LEN_BYTE_ARRAY without a string annotation.
+        assertEquals(Types.STRING, convertedType(Schema.create(Type.BYTES)));
 
-        Schema fixedSchema = Schema.createFixed("name", "doc", "space", 0);
-        assertThrows(DataException.class, () -> convertedType(fixedSchema));
+        Schema fixedSchema = Schema.createFixed("name", "doc", "space", 4);
+        assertEquals(Types.STRING, convertedType(fixedSchema));
 
-        assertThrows(DataException.class, () -> convertedType(unionSchema(Type.NULL, Type.BYTES)));
+        assertEquals(Types.STRING, convertedType(unionSchema(Type.NULL, Type.BYTES)));
+
+        // A decimal is read through a string column as well, as a decimal number.
+        Schema decimalSchema = LogicalTypes.decimal(20, 0).addToSchema(Schema.create(Type.BYTES));
+        assertEquals(Types.STRING, convertedType(decimalSchema));
+
+        // A union without a concrete branch used to raise a NullPointerException.
+        assertThrows(DataException.class, () -> convertedType(unionSchema(Type.NULL)));
     }
 
     private Schema unionSchema(Type... types) {
