@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.avro.LogicalTypes;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.embulk.spi.Column;
@@ -39,10 +40,45 @@ public class TestColumnGetterFactory {
         Schema uSchema = Schema.createUnion(Schema.create(Type.NULL), Schema.create(Type.FLOAT));
         assertTrue(newColumnGetter(uSchema) instanceof FloatColumnGetter);
 
-        assertThrows(DataException.class, () -> newColumnGetter(Schema.create(Type.BYTES)));
+        assertTrue(newColumnGetter(Schema.create(Type.BYTES)) instanceof BytesColumnGetter);
 
-        Schema fixedSchema = Schema.createFixed("name", "doc", "space", 0);
-        assertThrows(DataException.class, () -> newColumnGetter(fixedSchema));
+        Schema fixedSchema = Schema.createFixed("name", "doc", "space", 4);
+        assertTrue(newColumnGetter(fixedSchema) instanceof BytesColumnGetter);
+
+        Schema nullableBytes =
+                Schema.createUnion(Schema.create(Type.NULL), Schema.create(Type.BYTES));
+        assertTrue(newColumnGetter(nullableBytes) instanceof BytesColumnGetter);
+    }
+
+    @Test
+    public void testNewColumnGetterForDecimal() {
+        Schema decimalBytes = LogicalTypes.decimal(20, 0).addToSchema(Schema.create(Type.BYTES));
+        assertTrue(newColumnGetter(decimalBytes) instanceof DecimalColumnGetter);
+
+        Schema decimalFixed =
+                LogicalTypes.decimal(20, 0)
+                        .addToSchema(Schema.createFixed("decimal", "doc", "space", 9));
+        assertTrue(newColumnGetter(decimalFixed) instanceof DecimalColumnGetter);
+
+        // The logical type has to survive the union unwrapping, otherwise a nullable BIGINT
+        // UNSIGNED would be read as the hexadecimal of its two's complement.
+        Schema nullableDecimal =
+                Schema.createUnion(
+                        Schema.create(Type.NULL),
+                        LogicalTypes.decimal(20, 0)
+                                .addToSchema(Schema.createFixed("nd", "doc", "space", 9)));
+        assertTrue(newColumnGetter(nullableDecimal) instanceof DecimalColumnGetter);
+    }
+
+    @Test
+    public void testNewColumnGetterForUnknownColumn() {
+        Schema schema = Schema.createRecord("record", "doc", "namespace", false, new ArrayList<>());
+        ColumnGetterFactory factory =
+                new ColumnGetterFactory(
+                        schema, null, new TimestampFormatter[] {null}, new TimestampUnit[] {null});
+        assertThrows(
+                DataException.class,
+                () -> factory.newColumnGetter(new Column(0, "missing", Types.STRING)));
     }
 
     private BaseColumnGetter newColumnGetter(Schema fieldSchema) {

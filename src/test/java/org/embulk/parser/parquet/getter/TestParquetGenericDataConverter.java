@@ -3,6 +3,7 @@ package org.embulk.parser.parquet.getter;
 import static org.embulk.parser.parquet.getter.ParquetGenericDataConverter.convert;
 import static org.junit.Assert.assertEquals;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -100,6 +101,20 @@ public class TestParquetGenericDataConverter {
         assertEquals(1, result.size());
         assertEquals(
                 new ImmutableLongValueImpl(1L), result.get(new ImmutableStringValueImpl("value")));
+    }
+
+    @Test
+    public void testConvertByteBuffer() {
+        assertEquals(
+                new ImmutableStringValueImpl("0102fe"),
+                convert(ByteBuffer.wrap(new byte[] {0x01, 0x02, (byte) 0xfe})).asStringValue());
+    }
+
+    @Test
+    public void testConvertGenericFixed() {
+        Schema schema = Schema.createFixed("fixed", "doc", "space", 2);
+        GenericData.Fixed fixed = new GenericData.Fixed(schema, new byte[] {0x0a, 0x0b});
+        assertEquals(new ImmutableStringValueImpl("0a0b"), convert(fixed).asStringValue());
     }
 
     @Test
