@@ -98,10 +98,12 @@ public final class BinaryParquetFixture {
                             .append(
                                     "amount",
                                     Binary.fromConstantByteArray(twosComplement(BIG_UNSIGNED, 9)))
+                            // Negative so the sign-restoring path of new BigInteger(bytes) is
+                            // exercised: -123 is stored as the two's complement byte 0x85.
                             .append(
                                     "price",
                                     Binary.fromConstantByteArray(
-                                            BigInteger.valueOf(123).toByteArray()));
+                                            BigInteger.valueOf(-123).toByteArray()));
             filled.addGroup("nested").append("inner", Binary.fromConstantByteArray(CHAR_BYTES));
             writer.write(filled);
 

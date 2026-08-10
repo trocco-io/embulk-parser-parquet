@@ -27,6 +27,11 @@ decoded into a decimal number instead, so guess still reports `string` but the v
 decimal representation (for example `18446744073709551615`, not its hexadecimal). Such a column can
 also be read as `double`, or as `long` when the value has an exact long representation.
 
+Known limitation: the `DECIMAL` decoding only applies to top-level columns. A decimal **nested
+inside a `RECORD`, `MAP` or `ARRAY`** (read as a `json` column) is emitted as the hexadecimal of its
+two's complement, because the nested value conversion dispatches on the runtime class and the
+logical type annotation is not available there.
+
 This matters for files produced by the Amazon RDS/Aurora snapshot export to S3, which maps
 
 | MySQL source type | Parquet type | read as |

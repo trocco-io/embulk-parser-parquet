@@ -68,7 +68,7 @@ public class TestParquetParserPluginBinary {
         assertEquals("010203ff", filled[4].toString());
         // DECIMAL annotated bytes must be a number, not the hexadecimal of its two's complement.
         assertEquals("18446744073709551615", filled[5].toString());
-        assertEquals("1.23", filled[6].toString());
+        assertEquals("-1.23", filled[6].toString());
         assertEquals("{\"inner\":\"6162\"}", filled[7].toString());
 
         final Object[] empty = records.get(1);
@@ -81,13 +81,13 @@ public class TestParquetParserPluginBinary {
     @Test
     public void testRunBinaryColumnAsDouble() {
         final List<Object[]> records = fetchRecords(schema(column("price", DOUBLE)));
-        assertEquals(1.23d, (Double) records.get(0)[0], 0.0001d);
+        assertEquals(-1.23d, (Double) records.get(0)[0], 0.0001d);
         assertNull(records.get(1)[0]);
     }
 
     @Test
     public void testRunDecimalColumnAsLongRaisesDataExceptionWhenInexact() {
-        // DECIMAL(9,2) 1.23 has no exact long representation.
+        // DECIMAL(9,2) -1.23 has no exact long representation.
         assertThrows(DataException.class, () -> fetchRecords(schema(column("price", LONG))));
         // BIGINT UNSIGNED max overflows a signed long.
         assertThrows(DataException.class, () -> fetchRecords(schema(column("amount", LONG))));
