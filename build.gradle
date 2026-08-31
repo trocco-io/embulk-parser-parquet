@@ -9,6 +9,14 @@ repositories {
     mavenCentral()
 }
 
+configurations.all {
+    // Drop EOL Apache Log4j 1.x (CVE-2019-17571, CVE-2021-4104, CVE-2022-23302/23305/23307).
+    // reload4j replaces it with a fully API-compatible, patched implementation.
+    exclude group: "log4j", module: "log4j"
+    // Standardise on a single SLF4J binding (slf4j-reload4j); ZooKeeper drags in slf4j-log4j12:1.7.25.
+    exclude group: "org.slf4j", module: "slf4j-log4j12"
+}
+
 group = "io.trocco"
 description = "Parquet parser plugin for Embulk."
 version = {
@@ -38,7 +46,13 @@ dependencies {
     compile "org.xerial.snappy:snappy-java:1.1.10.3"
 
     compile project(path: ":shadow-jackson-jq", configuration: 'shadow')
-    compile "org.slf4j:slf4j-log4j12:1.7.36"
+
+    // Security: Hadoop -> ZooKeeper 3.6.3 pulls EOL Apache Log4j 1.2.17 (excluded in
+    // configurations.all below). reload4j is a drop-in fork that keeps the org.apache.log4j.* API
+    // and removes only the vulnerable classes. Pin it (and the matching SLF4J binding) explicitly so
+    // the API impl is guaranteed present and a single SLF4J binding is used.
+    compile "ch.qos.reload4j:reload4j:1.2.26"
+    compile "org.slf4j:slf4j-reload4j:1.7.36"
 
     testCompile "junit:junit:4.+"
     testCompile("org.embulk:embulk-junit4:0.10.49") { exclude group: "org.slf4j", module: "slf4j-api" }
@@ -94,3 +108,20 @@ test {
         showStandardStreams true
     }
 }
+
+// Regression guard: fail the build if EOL Apache Log4j 1.x ever returns to the shipped classpath.
+task verifyNoLegacyLog4j {
+    doLast {
+        ["runtimeClasspath", "embulkPluginRuntime"].each { cfgName ->
+            def cfg = configurations.findByName(cfgName)
+            if (cfg == null) return
+            def offenders = cfg.resolvedConfiguration.resolvedArtifacts.findAll {
+                it.moduleVersion.id.group == "log4j" && it.moduleVersion.id.name == "log4j"
+            }
+            if (!offenders.isEmpty()) {
+                throw new GradleException("Legacy Apache Log4j 1.x found on ${cfgName}: ${offenders*.moduleVersion*.id}")
+            }
+        }
+    }
+}
+check.dependsOn verifyNoLegacyLog4j
