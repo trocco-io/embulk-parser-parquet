@@ -31,8 +31,8 @@ dependencies {
     compile "org.embulk:embulk-util-timestamp:0.2.1"
     compile "org.embulk:embulk-util-config:0.3.3"
 
-    compile 'org.apache.parquet:parquet-avro:1.13.1'
-    compile 'org.apache.parquet:parquet-hadoop:1.13.1'
+    compile 'org.apache.parquet:parquet-avro:1.15.2'
+    compile 'org.apache.parquet:parquet-hadoop:1.15.2'
     compile 'org.apache.avro:avro:1.11.4'
     compile('org.apache.hadoop:hadoop-mapreduce-client-core:3.3.6') { exclude group: "org.slf4j", module: "slf4j-log4j12" }
     compile 'org.apache.hadoop:hadoop-common:3.3.6'

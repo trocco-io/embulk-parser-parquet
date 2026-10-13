@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.util.EnumMap;
 import java.util.Map;
 import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericData;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.LocalFileSystem;
@@ -58,7 +59,7 @@ public class ParquetUtil {
         Configuration configuration = new Configuration();
         configuration.set("fs.file.impl", LocalFileSystem.class.getName());
         try {
-            return builder.withConf(configuration).build();
+            return builder.withDataModel(GenericData.get()).withConf(configuration).build();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
